@@ -1,0 +1,1 @@
+enum visualtype { YEARLY, MONTHLY }
