@@ -1,21 +1,22 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:rainfalldata/pages/dashboard.dart';
 
-class GifSplashScreen extends StatefulWidget {
-  const GifSplashScreen({super.key});
+@RoutePage()
+class SplashScreenPage extends StatefulWidget {
+  const SplashScreenPage({super.key});
 
   @override
   _GifSplashScreenState createState() => _GifSplashScreenState();
 }
 
-class _GifSplashScreenState extends State<GifSplashScreen> {
+class _GifSplashScreenState extends State<SplashScreenPage> {
   @override
   void initState() {
     super.initState();
 
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Dashboard()));
+      context.router.replaceNamed('/homepage');
     });
   }
 

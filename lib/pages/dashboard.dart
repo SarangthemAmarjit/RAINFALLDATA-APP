@@ -1,12 +1,17 @@
+// ignore_for_file: must_be_immutable
+
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rainfalldata/constant/visualtype.dart';
 
 import 'package:rainfalldata/controller/tapcontroller.dart';
 import 'package:rainfalldata/pages/subdivsionpage.dart';
+import 'package:rainfalldata/router/router.dart';
 
-class Dashboard extends StatelessWidget {
-  Dashboard({super.key});
+@RoutePage()
+class HomePage extends StatelessWidget {
+  HomePage({super.key});
 
   TextEditingController searchcontroller = TextEditingController();
   @override
@@ -110,6 +115,8 @@ class Dashboard extends StatelessWidget {
                               focusNode: FocusNode(),
                               autofocus: false,
                               decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                    color: Colors.grey.withOpacity(0.5)),
                                 contentPadding: const EdgeInsets.only(top: 7),
                                 prefixIcon: const Icon(
                                   Icons.search,
@@ -166,15 +173,10 @@ class Dashboard extends StatelessWidget {
                                                       .allsearchresult[i]);
                                               controller.changevisualtypre(
                                                   visualtype.YEARLY);
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          SubDivisionPage(
-                                                              subdivisionname:
-                                                                  controller
-                                                                          .allsubdivision[
-                                                                      i])));
+                                              context.router.push(
+                                                  SubDivisionRoute(
+                                                      subdivisionname: controller
+                                                          .allsubdivision[i]));
                                             },
                                             dense: true,
                                             shape: RoundedRectangleBorder(
