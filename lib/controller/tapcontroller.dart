@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
@@ -7,8 +10,13 @@ import 'package:rainfalldata/model/alldatamodel.dart';
 class GetxTapController extends GetxController {
   RainfallData? alldata;
   final List _allsubdivision = [];
-  final List _allsubdivisiondata = [];
+  List _allsearchresult = [];
+  List _yearlist = [];
+  List<double> _datalist = [];
+  List<double>? _monthdatalist;
+  List<Record> _allsubdivisiondata = [];
   visualtype _graphtype = visualtype.YEARLY;
+  final ScrollController _scrollController = ScrollController();
 
   String _dropdownValueJobType = '';
   var isDataLoading = false.obs;
@@ -21,6 +29,10 @@ class GetxTapController extends GetxController {
   List get allsubdivisiondata => _allsubdivisiondata;
   String get dropdownValueJobType => _dropdownValueJobType;
   String get dropdownvalueyear => _dropdownvalueyear;
+  List get yearlist => _yearlist;
+  List get allsearchresult => _allsearchresult;
+  List<double> get datalist => _datalist;
+  List<double>? get monthdatalist => _monthdatalist;
 
   @override
   Future<void> onInit() async {
@@ -36,14 +48,42 @@ class GetxTapController extends GetxController {
   @override
   void onClose() {}
 
+  void getsearchresult(
+    String enteredKeyword,
+  ) {
+    print(enteredKeyword);
+    List results = [];
+    _allsearchresult = [];
+
+    if (enteredKeyword.isEmpty) {
+      results = _allsubdivision;
+      update();
+    } else {
+      results = _allsubdivision
+          .where((user) => user
+              .toString()
+              .toLowerCase()
+              .contains(enteredKeyword.toLowerCase()))
+          .toList();
+      update();
+      print(results.toString());
+    }
+    _allsearchresult = results;
+    update();
+
+    // Refresh the UI
+  }
+
   Future getalldata() async {
     print('fafafa');
     try {
+      _allsearchresult = _allsubdivision;
+      print(_allsearchresult.length);
       isDataLoading(true);
       final queryParameters = {
         "api-key": "579b464db66ec23bdd000001977a7a5e5d38400f5410ed97d4ba41a7",
         "format": "json",
-        "limit": "1000"
+        "limit": "4188"
       };
 
       final response = await http.get(
@@ -67,6 +107,7 @@ class GetxTapController extends GetxController {
         update();
 
         print('Successfully get Data');
+        print(_allsearchresult.length.toString());
       } else {
         print('Failed to Getdata.');
       }
@@ -85,6 +126,16 @@ class GetxTapController extends GetxController {
     update();
   }
 
+  void scrollToSelectedItem(BuildContext context) {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    double offset = renderBox.localToGlobal(Offset.zero).dy;
+    _scrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   void changevisualtypre(
     visualtype visual,
   ) {
@@ -92,6 +143,8 @@ class GetxTapController extends GetxController {
       _isselectedmonthly = true;
       update();
     } else {
+      _dropdownvalueyear = '';
+      _monthdatalist = null;
       _isselectedmonthly = false;
       update();
     }
@@ -100,11 +153,27 @@ class GetxTapController extends GetxController {
   }
 
   void getallsubdivisiondata(String subdivisionname) {
+    _allsubdivisiondata = [];
+    _datalist = [];
+    _yearlist = [];
     for (var element in alldata!.records) {
       if (element.subdivision == subdivisionname) {
         _allsubdivisiondata.add(element);
       }
     }
+
+    for (var element in _allsubdivisiondata) {
+      if (_yearlist.contains(double.parse(element.year))) {
+        print("already exist");
+      } else if (element.annual == 'NA') {
+        _yearlist.add(element.year);
+        _datalist.add(0.0);
+      } else {
+        _yearlist.add(element.year);
+        _datalist.add(double.parse(element.annual));
+      }
+    }
+
     print(_allsubdivisiondata.toString());
   }
 
@@ -112,6 +181,32 @@ class GetxTapController extends GetxController {
     String year,
   ) {
     _dropdownvalueyear = year;
+    print(year);
+
+    _monthdatalist = [];
+    for (var element in _allsubdivisiondata) {
+      if (element.year == year) {
+        _monthdatalist!.addAll([
+          double.parse(element.jan),
+          double.parse(element.feb),
+          double.parse(element.mar),
+          double.parse(element.apr),
+          double.parse(element.may),
+          double.parse(element.jun),
+          double.parse(element.jul),
+          double.parse(element.aug),
+          double.parse(element.sep),
+          double.parse(element.oct),
+          double.parse(element.nov),
+          double.parse(element.dec),
+        ]);
+        print('Year  Found');
+      } else {
+        print('Year Not Found');
+      }
+    }
+    print(_monthdatalist.toString());
+    print("Month Datalist Length :$_monthdatalist.length");
     update();
   }
 }
